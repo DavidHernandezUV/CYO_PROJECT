@@ -1,7 +1,11 @@
 import tkinter as tk
 import tksheet
 from minizinc import Instance, Model, Solver
+import matplotlib
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+matplotlib.use("TkAgg")
 def config_gui():
     
     #CONSTANTES
@@ -12,6 +16,7 @@ def config_gui():
     CAP_N = 1000
     CAP_H = 300
     CAP_T = 500
+    
 
     input_window = tk.Tk()
     input_window.title("Problema de la empresa proveedora de energía")
@@ -171,8 +176,22 @@ def apply_solver(costs,capacities,daily_demand_table,mw_prices_per_client,v_min_
     instance["Vmin"] = v_min_value #Venta mínima de energía a cada cliente si la producción no alcanza a cubrir la demanda
     instance["precio"] = precio  #Precio de MW para cada cliente
     result = instance.solve()
-    print(result.solution.produccion)
+    #print(result.solution.produccion)
+    print(result)
     
-
+def show_results(result):
+    results_window = tk.Tk()
+    results_window.title("Solución")
+    figure = Figure(figsize=(6, 4), dpi=100)
+    figure_canvas = FigureCanvasTkAgg(figure, results_window)
+    axes = figure.add_subplot()
+    axes.bar(topics, pages)
+    axes.set_title(
+        "Solución (Total páginas: %d, Número potencial de lectores: %d)"
+        % (total, readers)
+    )
+    axes.set_ylabel("Número de páginas")
+    figure_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+    
 if __name__ == "__main__":
     config_gui()
