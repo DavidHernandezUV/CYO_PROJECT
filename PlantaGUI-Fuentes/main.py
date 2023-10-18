@@ -178,20 +178,64 @@ def apply_solver(costs,capacities,daily_demand_table,mw_prices_per_client,v_min_
     result = instance.solve()
     #print(result.solution.produccion)
     print(result)
+    show_results(result)
     
 def show_results(result):
     results_window = tk.Tk()
     results_window.title("Solución")
-    figure = Figure(figsize=(6, 4), dpi=100)
+    results_window.configure(bg="white")
+
+    # Crear una figura con una cuadrícula de 2x2
+    figure = Figure(figsize=(10, 8), dpi=100)
+
+    #*********************************PRODUCTION*****************************************
+    subplot1 = figure.add_subplot(2, 1, 2)
+    production = result.solution.produccion
+    days = list(range(1,len(production[0])+1))
+    colors = ['b', 'g', 'r']
+    labels = ['Nuclear', 'Hidroeléctrica', 'Térmica']
+    for i, data in enumerate(production):
+        subplot1.plot(days, data, label=labels[i], color=colors[i])
+        for day, value in zip(days, data):
+            subplot1.text(day, value, f"{value:.1f}", ha='center', va='bottom', fontsize=8)
+    subplot1.legend()
+    subplot1.set_xlabel('Días')
+    subplot1.set_ylabel('MW')
+    subplot1.set_title('Producción por día')
+    #*********************************Main function*****************************************
+    main_function_label = tk.Label(results_window, text='Máxima ganancia',bg="white",font=("Arial", 16))
+    main_function_label.pack()
+    f = tk.Label(results_window, text="$ "+str(result.solution.f),bg="white",font=("Arial", 16))
+    f.pack()
+    #*********************************daily total cost*****************************************
+    subplot3 = figure.add_subplot(2, 2, 1)
+    daily_cost = result.solution.costo_total_diario
+    days = list(range(1, len(daily_cost) + 1))
+    bars = subplot3.bar(days, daily_cost, align='center')
+    subplot3.set_xlabel('Día')
+    subplot3.set_ylabel('Costo')
+    subplot3.set_title('Costo Total Diario')
+    for bar, cost in zip(bars, daily_cost):
+        height = bar.get_height()
+        subplot3.annotate(f'{cost:.1f}', xy=(bar.get_x() + bar.get_width() / 2, height+4),
+                        xytext=(0, 3), textcoords='offset points', ha='center', va='bottom', fontsize=7)
+
+    #*********************************daily total income*****************************************
+    subplot4 = figure.add_subplot(2, 2, 2)
+    daily_income = result.solution.ingresos_diarios
+    days = list(range(1, len(daily_income) + 1))
+    bars = subplot4.bar(days, daily_income, align='center')
+    subplot4.set_xlabel('Día')
+    subplot4.set_ylabel('Ingresos')
+    subplot4.set_title('Ingresos Diarios')
+    for bar, cost in zip(bars, daily_income):
+        height = bar.get_height()
+        subplot4.annotate(f'{cost:.1f}', xy=(bar.get_x() + bar.get_width() / 2, height+4),
+                        xytext=(0, 3), textcoords='offset points', ha='center', va='bottom', fontsize=7)
+
+    # Agregar la figura a la ventana
     figure_canvas = FigureCanvasTkAgg(figure, results_window)
-    axes = figure.add_subplot()
-    axes.bar(topics, pages)
-    axes.set_title(
-        "Solución (Total páginas: %d, Número potencial de lectores: %d)"
-        % (total, readers)
-    )
-    axes.set_ylabel("Número de páginas")
-    figure_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+    figure_canvas.get_tk_widget().pack(padx=5, pady=5)
     
 if __name__ == "__main__":
     config_gui()
