@@ -184,10 +184,13 @@ def apply_solver(costs,capacities,daily_demand_table,mw_prices_per_client,v_min_
     instance = Instance(solver, model)
     d_bi = [row[1:] for row in daily_demand_table]
     d = [item for sublist in d_bi for item in sublist]
+    d = [int(x) for x in d]
     precio_bi = [row[1:] for row in mw_prices_per_client]
     precio = [item for sublist in precio_bi for item in sublist]
+    precio = [int(x) for x in precio]
     m = len(d_bi) 
-    n = len(d_bi[0]) 
+    n = len(d_bi[0])
+    print(costs,capacities,m,n,d,v_min_value,precio,prah_value,dch_value)
     instance["C"]=costs #Costo de producir un MW para cada planta
     instance["CAP"]=capacities #Capacidad de producción diara en MW
     instance["m"] = m #Cantidad de clientes
@@ -276,14 +279,14 @@ def show_results(result):
     subplot5.set_title('Energía vendida x cliente')
     subplot5.axis('off')
     # Mostrar la figura
-    figure.tight_layout()
+    #figure.tight_layout()
     #*********************************Daily Capacity H*****************************************
     subplot6 = figure.add_subplot(gs[2,:2])
     daily_cap_h = result.solution.cap_diaria_H
     days = list(range(1,len(daily_cap_h)+1))
     color = 'b'
     label = 'Hidroeléctrica'
-    subplot6.plot(days, data, label=label, color=color)
+    subplot6.plot(days, daily_cap_h, label=label, color=color)
     for day, value in zip(days, daily_cap_h):
         subplot6.text(day, value, f"{value:.1f}", ha='center', va='bottom', fontsize=8)
     subplot6.legend()
@@ -303,7 +306,7 @@ def show_results(result):
     subplot7.set_title('Días consecutivos en régimen alto (Hidroeléctrica)')
     subplot7.axis('off')
     # Mostrar la figura
-    figure.tight_layout()
+    #figure.tight_layout()
     # Agregar la figura a la ventana
     figure_canvas = FigureCanvasTkAgg(figure, results_window)
     figure_canvas.get_tk_widget().pack(padx=5, pady=5)
